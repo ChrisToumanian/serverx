@@ -2,22 +2,35 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <thread>
 #include "server.h"
 #include "channel.h"
 #include "reader.h"
 #include "chat.h"
 
+struct Message
+{
+	int client_id;
+	std::string data;
+};
+
+bool running = false;
 int port = 25566;
 int max_clients = 100;
+int queue_limit = 1000;
 std::string server_name = "server";
 std::string config_filename = "server.yml";
-std::vector<Channel*> channels;
+static std::vector<Channel*> channels;
+static std::vector<Message*> queue;
 static Server* server;
 
 void read_config();
-void start();
 void load();
+void start();
+void loop();
 void stop();
+void manage_queue();
+void send_to_channels(int client_id, std::string message);
 std::string receive(Client* client, std::string message);
 std::string command(Client* client, std::string message);
 
@@ -52,16 +65,28 @@ void load()
 	channel->server = server;
 	channel->load();
 	channels.push_back(channel);
-	//Channel* channel = new Channel();
-	//channel->server = server;
-	//channel->load();
-	//channels.push_back(channel);
 }
 
 void start()
 {
+	// Begin queue loop
+	running = true;
+	std::thread loop_thread(loop);
+	
+	// Create server thread
 	std::cout << "Initializing server..." << std::endl;
 	server->start();
+
+	// Clean up and exit
+	loop_thread.join();
+}
+
+void loop()
+{
+	while (running)
+	{
+		manage_queue();
+	}
 }
 
 void stop()
@@ -73,13 +98,43 @@ std::string receive(Client* client, std::string message)
 {
     Reader::rtrim(message);
 
-	if (message.length() > 0) // client message
+	// Add to queue
+	if (message.length() > 0)
     {
-		for (int i = 0; i < channels.size(); i++)
-		{
-			channels[i]->receive(client->id, message);
-		}
+		Message* msg = new Message();
+		msg->client_id = client->id;
+		msg->data = message;
+		queue.push_back(msg);
 	}
 
 	return "";
+}
+
+void manage_queue()
+{
+	// Enforce queue limit
+	if (queue.size() > queue_limit)
+	{
+		for (int i = queue_limit - 1; i > -1; i--)
+		{
+			delete queue[i];
+			queue[i] = NULL;
+			queue.erase(queue.begin() + i);
+		}
+	}
+
+	// Handle messages
+	for (int i = 0; i < queue.size(); i++)
+	{
+		send_to_channels(queue[i]->client_id, queue[i]->data);
+		queue.erase(queue.begin() + i);
+	}
+}
+
+void send_to_channels(int client_id, std::string message)
+{
+	for (int i = 0; i < channels.size(); i++)
+	{
+		channels[i]->receive(client_id, message);
+	}
 }

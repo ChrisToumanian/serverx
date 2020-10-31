@@ -17,13 +17,13 @@ void Channel::receive(int user_id, std::string message)
     User* user = get_user(user_id);
     std::vector<std::string> commands = Reader::split(message, " ");
 
-	if (user != NULL && commands[0] == "/quit")
+	if (user != NULL && user != nullptr && commands[0] == "/quit")
 	{
 		user_disconnected(user);
 		server->disconnect(user->id);
 		remove_user(user);
 	}
-	else if (user != NULL)
+	else if (user != NULL && user != nullptr)
 	{
 		user_message(user, message, commands);
 	}
@@ -32,7 +32,7 @@ void Channel::receive(int user_id, std::string message)
 		User* user = add_user(user_id);
 		user_connected(user);
 	}
-	else if (commands[0] == "/disconnected")
+	else if (user != NULL && user != nullptr && commands[0] == "/disconnected")
 	{
 		user_disconnected(user);
 		server->disconnect(user->id);
