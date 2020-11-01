@@ -1,7 +1,7 @@
 #ifndef CHAT_H
 #define CHAT_H
 
-#include "channel.h"
+#include "../channel.h"
 
 class Chat : public Channel
 {

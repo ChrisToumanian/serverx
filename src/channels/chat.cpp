@@ -23,6 +23,20 @@ void Chat::user_command(User* user, std::vector<std::string> commands)
 		server->broadcast("[" + user->username + "] " + Reader::join(commands));
 		server->log(user->username, Reader::join(commands));
 	}
+	else if (commands[0] == "/uid" && commands.size() == 2) // Sign in player by UID
+	{
+		// Check players.csv
+		std::vector<std::string> lines = Reader::get_file_lines("players.csv");
+		for (std::string line : lines)
+		{
+			std::vector<std::string> data = Reader::split(line, ",");
+			if (data[0] == commands[1]) // UID matches player
+			{
+				user->uid = data[0];
+				user->username = data[1];
+			}
+		}
+	}
 	else if (commands[0] == "/name" && commands.size() == 2) // Username change
 	{
 		server->broadcast("[" + user->username + "] changed name to " + commands[1]);

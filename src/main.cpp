@@ -6,7 +6,8 @@
 #include "server.h"
 #include "channel.h"
 #include "reader.h"
-#include "chat.h"
+#include "channels/chat.h"
+#include "user.h"
 
 struct Message
 {
@@ -60,11 +61,11 @@ void load()
 {
 	server = new Server(port, receive);
 
-	// Load channels
-	Chat* channel = new Chat();
-	channel->server = server;
-	channel->load();
-	channels.push_back(channel);
+	// Load chat channel
+	Chat* chat = new Chat();
+	chat->server = server;
+	chat->load();
+	channels.push_back(chat);
 }
 
 void start()
