@@ -25,7 +25,7 @@ void Channel::receive(int user_id, std::string message)
 	}
 	else if (user != NULL && user != nullptr)
 	{
-		user_message(user, message, commands);
+		user_command(user, commands);
 	}
 	else if (commands[0] == "/connected")
 	{
@@ -52,13 +52,13 @@ void Channel::user_disconnected(User* user)
 	server->broadcast(user->username + " left.");
 }
 
-void Channel::user_message(User* user, std::string message, std::vector<std::string> commands)
+void Channel::user_command(User* user, std::vector<std::string> commands)
 {
 	if (commands[0][0] != '/')
 	{
-		user->receive(message);
-		server->broadcast("[" + user->username + "] " + message);
-		server->log(user->username, message);
+		user->receive(Reader::join(commands));
+		server->broadcast("[" + user->username + "] " + Reader::join(commands));
+		server->log(user->username, Reader::join(commands));
 	}
 }
 
@@ -68,6 +68,10 @@ void Channel::send_to_all(std::string message)
 
 void Channel::send_to_user(User* user, std::string message)
 {
+	if (user != NULL)
+	{
+		server->send_to(user->id, message);
+	}
 }
 
 User* Channel::add_user(int user_id)

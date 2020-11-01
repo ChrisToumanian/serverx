@@ -23,7 +23,7 @@ public:
 
 	virtual void user_connected(User* user);
 	virtual void user_disconnected(User* user);
-	virtual void user_message(User* user, std::string message, std::vector<std::string> commands);
+	virtual void user_command(User* user, std::vector<std::string> commands);
 	virtual void send_to_all(std::string message);
 	virtual void send_to_user(User* user, std::string message);
 

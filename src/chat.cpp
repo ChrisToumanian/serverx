@@ -7,7 +7,7 @@ Chat::Chat()
 void Chat::user_connected(User* user)
 {
 	server->log(user->username, "connected.");
-	server->broadcast(user->username + "joined.");
+	server->broadcast(user->username + " joined.");
 }
 
 void Chat::user_disconnected(User* user)
@@ -16,20 +16,30 @@ void Chat::user_disconnected(User* user)
 	server->broadcast(user->username + " left.");
 }
 
-void Chat::user_message(User* user, std::string message, std::vector<std::string> commands)
+void Chat::user_command(User* user, std::vector<std::string> commands)
 {
-	if (commands[0][0] != '/')
+	if (commands[0][0] != '/') // Say
 	{
-		user->receive(message);
-		server->broadcast("[" + user->username + "] " + message);
-		server->log(user->username, message);
+		server->broadcast("[" + user->username + "] " + Reader::join(commands));
+		server->log(user->username, Reader::join(commands));
 	}
-}
-
-void Chat::send_to_all(std::string message)
-{
-}
-
-void Chat::send_to_user(User* user, std::string message)
-{
+	else if (commands[0] == "/name" && commands.size() == 2) // Username change
+	{
+		server->broadcast("[" + user->username + "] changed name to " + commands[1]);
+		user->username = commands[1];
+	}
+	else if (commands[0] == "/me" && commands.size() > 1) // Emote
+	{
+		server->broadcast(user->username + " " + Reader::join(commands, 1));
+		server->log(user->username, Reader::join(commands, 1));
+	}
+	else if (commands[0] == "/yell") // Yell
+	{
+		server->broadcast(user->username + " yells " + Reader::join(commands, 1));
+		server->log(user->username, "yells " + Reader::join(commands, 1));
+	}
+	else if (commands[0] == "/whisper" && commands.size() > 2) // Whisper
+	{
+		send_to_user(get_user(commands[1]), user->username + " whispers " + Reader::join(commands, 2));
+	}
 }
