@@ -79,7 +79,7 @@ User* Channel::add_user(int user_id)
 	User* user = new User();
 	user->id = user_id;
 	user->username = "User#" + std::to_string(user_id);
-	users.push_back(user);
+	users->push_back(user);
 
 	return user;
 }
@@ -87,11 +87,11 @@ User* Channel::add_user(int user_id)
 void Channel::remove_user(User* user)
 {
     int i = 0;
-    for (auto& u : users)
+    for (auto& u : *users)
     {
         if (u->id == user->id)
         {
-            users.erase(users.begin() + i);
+            users->erase(users->begin() + i);
         }
         i++;
     }
@@ -106,7 +106,7 @@ int Channel::get_new_id()
 
 User* Channel::get_user(int user_id)
 {
-    for (auto& user : users)
+    for (auto& user : *users)
     {
         if (user->id == user_id)
             return user;
@@ -116,7 +116,7 @@ User* Channel::get_user(int user_id)
 
 User* Channel::get_user(std::string username)
 {
-    for (auto& user : users)
+    for (auto& user : *users)
     {
         if (user->username == username)
             return user;
@@ -126,7 +126,7 @@ User* Channel::get_user(std::string username)
 
 int Channel::get_users_online()
 {
-    if (users.size() > 0)
-        return users.size();
+    if (users->size() > 0)
+        return users->size();
     return 0;
 }

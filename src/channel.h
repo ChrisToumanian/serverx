@@ -13,7 +13,7 @@ public:
     Channel();
 
 	std::string name = "channel";
-	std::vector<User*> users;
+	std::vector<User*>* users;
 	int current_id = 0;
 	Server* server;
     

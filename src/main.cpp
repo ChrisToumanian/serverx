@@ -6,8 +6,8 @@
 #include "server.h"
 #include "channel.h"
 #include "reader.h"
-#include "channels/chat.h"
 #include "user.h"
+#include "channels/chat.h"
 
 struct Message
 {
@@ -23,6 +23,7 @@ std::string server_name = "server";
 std::string config_filename = "server.yml";
 static std::vector<Channel*> channels;
 static std::vector<Message*> queue;
+static std::vector<User*> users;
 static Server* server;
 
 void read_config();
@@ -60,9 +61,10 @@ void read_config()
 void load()
 {
 	server = new Server(port, receive);
-
+	
 	// Load chat channel
 	Chat* chat = new Chat();
+	chat->users = &users;
 	chat->server = server;
 	chat->load();
 	channels.push_back(chat);
